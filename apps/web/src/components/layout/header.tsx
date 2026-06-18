@@ -1,0 +1,146 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+
+type NavItem = { href: string; label: string };
+
+const NAV: NavItem[] = [
+  { href: "/", label: "Головна" },
+  { href: "/bookings", label: "Розклад" },
+  { href: "/rooms", label: "Переговорні" },
+  { href: "/users", label: "Користувачі" },
+  { href: "/profile", label: "Профіль" }
+];
+
+function cx(...v: Array<string | false | null | undefined>) {
+  return v.filter(Boolean).join(" ");
+}
+
+export function Header() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  // Імітуємо статичну сесію авторизованого користувача для Лаби №1
+  const session = {
+    user: {
+      name: "Олександр Степанов",
+      role: "Співробітник"
+    }
+  };
+
+  const activeHref = useMemo(() => pathname ?? "/", [pathname]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const onNavClick = () => setOpen(false);
+
+  return (
+    <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="flex h-14 items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2" onClick={onNavClick}>
+              <div className="h-8 w-8 rounded-xl bg-blue-600" />
+              <div className="leading-tight">
+                <div className="text-sm font-semibold text-neutral-900">RoomBooking</div>
+                <div className="hidden text-xs text-neutral-500 sm:block">Meeting Rooms</div>
+              </div>
+            </Link>
+
+            <nav className="hidden items-center gap-1 md:flex">
+              {NAV.map((it) => {
+                const isActive =
+                  activeHref === it.href ||
+                  (it.href !== "/" && activeHref.startsWith(it.href));
+                return (
+                  <Link
+                    key={it.href}
+                    href={it.href}
+                    onClick={onNavClick}
+                    className={cx(
+                      "rounded-xl px-3 py-2 text-sm transition",
+                      isActive
+                        ? "bg-neutral-100 text-neutral-900 font-medium"
+                        : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    )}
+                  >
+                    {it.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="hidden text-right sm:block mr-2">
+              <div className="text-sm font-medium text-neutral-900">{session.user.name}</div>
+              <div className="text-xs text-neutral-500">{session.user.role}</div>
+            </div>
+            
+            <Link
+              href="/bookings/new"
+              onClick={onNavClick}
+              className="hidden items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
+            >
+              Нова бронь
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition hover:bg-neutral-50 md:hidden"
+              aria-label="Відкрити меню"
+              aria-expanded={open}
+            >
+              <span className="sr-only">Menu</span>
+              <div className="flex flex-col gap-1">
+                <span className={cx("block h-0.5 w-5 bg-neutral-900 transition", open && "translate-y-1.5 rotate-45")} />
+                <span className={cx("block h-0.5 w-5 bg-neutral-900 transition", open && "opacity-0")} />
+                <span className={cx("block h-0.5 w-5 bg-neutral-900 transition", open && "-translate-y-1.5 -rotate-45")} />
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Мобільне меню */}
+        <div className={cx("overflow-hidden transition-[max-height,opacity] duration-200 md:hidden", open ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0")}>
+          <div className="pb-4 pt-2">
+            <div className="grid gap-1">
+              {NAV.map((it) => {
+                const isActive = activeHref === it.href || (it.href !== "/" && activeHref.startsWith(it.href));
+                return (
+                  <Link
+                    key={it.href}
+                    href={it.href}
+                    onClick={onNavClick}
+                    className={cx("rounded-xl px-3 py-2 text-sm transition", isActive ? "bg-neutral-100 text-neutral-900" : "text-neutral-700 hover:bg-neutral-50")}
+                  >
+                    {it.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <Link
+                href="/bookings/new"
+                onClick={onNavClick}
+                className="inline-flex flex-1 items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+              >
+                Нова бронь
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}

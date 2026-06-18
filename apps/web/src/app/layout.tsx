@@ -1,29 +1,26 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/header/header";
-
-const geist = Geist({
-  subsets: ["latin"],
-});
+import type { Metadata } from "next";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 
 export const metadata: Metadata = {
-  title: "RoomBooking System",
+  title: "RoomBooking",
   description: "Система бронювання переговорних кімнат",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="uk">
-      <body className={`${geist.className} antialiased min-h-screen flex flex-col bg-gray-50`}>
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
+      <body>
+        <div className="min-h-dvh flex flex-col">
+          <Header />
+          <main className="flex-1 py-6">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
