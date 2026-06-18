@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f9fafb; /* Звичайний світло-сірий фон, як у більшості чистих систем */
+  color: #111827; /* Темний читимий текст */
+}
