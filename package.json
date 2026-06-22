@@ -10,5 +10,9 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "build:web": "npm run build --workspace=apps/web",
     "start:web": "npm run start --workspace=apps/web"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.3.1",
+    "postcss": "^8.5.15"
   }
 }
