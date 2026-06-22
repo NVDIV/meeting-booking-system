@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  ARCHIVED
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(255)
+  email           String           @unique @db.VarChar(255)
+  password        String           @db.VarChar(255)
+  role            Role             @default(USER)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  bookings        Booking[]
+  historyChanges  BookingHistory[]
+
+  @@map("users")
+}
+
+model Room {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(100)
+  capacity  Int
+  equipment String?   @db.Text
+  location  String    @db.VarChar(255)
+  bookings  Booking[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id          Int              @id @default(autoincrement())
+  userId      Int              @map("user_id")
+  roomId      Int              @map("room_id")
+  title       String           @db.VarChar(255)
+  description String?          @db.Text
+  startTime   DateTime         @map("start_time")
+  endTime     DateTime         @map("end_time")
+  status      BookingStatus    @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room        Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  histories   BookingHistory[]
+
+  @@map("bookings")
+
+  @@index([status])
+  @@index([startTime])
+}
+
+model BookingHistory {
+  id        Int           @id @default(autoincrement())
+  bookingId Int           @map("booking_id")
+  changedBy Int           @map("changed_by")
+  status    BookingStatus
+  changedAt DateTime      @default(now()) @map("changed_at")
+
+  booking   Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [changedBy], references: [id], onDelete: Cascade)
+
+  @@map("booking_histories")
+}
